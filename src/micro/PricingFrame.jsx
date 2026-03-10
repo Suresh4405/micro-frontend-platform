@@ -13,7 +13,7 @@ export default function PricingFrame({ darkMode }) {
           type: "theme",
           darkMode
         },
-        "http://localhost:3001"
+        "https://micro-frontend-pricing.vercel.app/"
       );
     };
 
@@ -24,7 +24,7 @@ export default function PricingFrame({ darkMode }) {
   return (
     <iframe
       ref={iframeRef}
-      src="http://localhost:3001"
+      src="https://micro-frontend-pricing.vercel.app/"
       style={{
         width: "100%",
         height: "1000px",

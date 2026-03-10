@@ -15,7 +15,7 @@ export default function EventsFrame({ darkMode }) {
           type: "theme",
           darkMode
         },
-        "http://localhost:3000"
+        "https://micro-frontend-events.vercel.app/"
       );
     };
 
@@ -41,7 +41,7 @@ useEffect(() => {
   return (
     <iframe
       ref={iframeRef}
-      src="http://localhost:3000"
+      src="https://micro-frontend-events.vercel.app/"
       style={{
         width: "100%",
         border: "none",
