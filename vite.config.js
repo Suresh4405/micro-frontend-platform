@@ -7,13 +7,37 @@ export default defineConfig({
     react(),
     federation({
       name: "container",
-
       remotes: {
-        pricing: "http://localhost:3000/_next/static/chunks/remoteEntry.js",
-        events: "http://localhost:3001/_next/static/chunks/remoteEntry.js"
+        pricing: "https://micro-frontend-pricing.vercel.app/_next/static/chunks/remoteEntry.js",
+        events: "https://micro-frontend-events.vercel.app/_next/static/chunks/remoteEntry.js"
       },
-
       shared: ["react", "react-dom"]
     })
-  ]
+  ],
+  server: {
+    proxy: {
+      '/api/emails': {
+        target: 'https://micro-frontend-events.vercel.app',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api\/emails/, '/api/emails'),
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        }
+      },
+      '/api/userdata': {
+        target: 'https://micro-frontend-pricing.vercel.app',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api\/userdata/, '/api/userdata'),
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        }
+      }
+    }
+  },
+  preview: {
+    port: 5173,
+    strictPort: true,
+  }
 });

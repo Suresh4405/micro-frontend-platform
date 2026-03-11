@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import EventsFrame from "./micro/EventsFrame";
 import PricingFrame from "./micro/PricingFrame";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
   const [darkMode, setDarkMode] = React.useState(false);
@@ -54,6 +55,10 @@ function App() {
             <Route
               path="/pricing"
               element={<PricingFrame darkMode={darkMode} />}
+            />
+             <Route
+              path="/admin"
+              element={<AdminDashboard />}
             />
           </Routes>
         </Router>

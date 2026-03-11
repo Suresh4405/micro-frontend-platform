@@ -40,7 +40,7 @@ export default function Navbar({ toggleTheme, darkMode }) {
     if (item === "Home") navigate("/");
     if (item === "Events") navigate("/events");
     if (item === "Pricing") navigate("/pricing");
-    if (item === "Admin") navigate("/");
+    if (item === "Admin") navigate("/admin");
 
   };
 
