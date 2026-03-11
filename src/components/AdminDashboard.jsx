@@ -1,6 +1,8 @@
+// src/components/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
+import { fetchEmails, fetchUserData } from '../services/api';
 import './Admin.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
@@ -18,31 +20,20 @@ const AdminDashboard = () => {
         setLoading(true);
         setError(null);
         
-        console.log('Fetching data from APIs...');
+        console.log('Environment:', import.meta.env.MODE);
+        console.log('Is Production:', import.meta.env.PROD);
         
-        const [emailsRes, usersRes] = await Promise.all([
-          fetch('/api/emails'),
-          fetch('/api/userdata')
+        // Fetch data from both APIs
+        const [emails, users] = await Promise.all([
+          fetchEmails(),
+          fetchUserData()
         ]);
 
-        console.log('Email response status:', emailsRes.status);
-        console.log('User response status:', usersRes.status);
+        console.log('Email data received:', emails);
+        console.log('User data received:', users);
 
-        if (!emailsRes.ok) {
-          throw new Error(`Email API error: ${emailsRes.status}`);
-        }
-        if (!usersRes.ok) {
-          throw new Error(`User API error: ${usersRes.status}`);
-        }
-
-        const emailsJson = await emailsRes.json();
-        const usersJson = await usersRes.json();
-
-        console.log('Email data received:', emailsJson);
-        console.log('User data received:', usersJson);
-
-        setEmailData(emailsJson);
-        setUserData(usersJson);
+        setEmailData(emails);
+        setUserData(users);
         
       } catch (err) {
         console.error('Fetch error:', err);
@@ -53,7 +44,7 @@ const AdminDashboard = () => {
     };
 
     fetchData();
-  }, []); 
+  }, []);
 
   const getEmailStats = () => {
     if (!emailData?.data) return null;

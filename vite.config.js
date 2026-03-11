@@ -19,25 +19,21 @@ export default defineConfig({
       '/api/emails': {
         target: 'https://micro-frontend-events.vercel.app',
         changeOrigin: true,
-        secure: false,
         rewrite: (path) => path.replace(/^\/api\/emails/, '/api/emails'),
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        }
       },
       '/api/userdata': {
         target: 'https://micro-frontend-pricing.vercel.app',
         changeOrigin: true,
-        secure: false,
         rewrite: (path) => path.replace(/^\/api\/userdata/, '/api/userdata'),
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        }
       }
     }
   },
   preview: {
-    port: "https://micro-frontend-platform.vercel.app",
+    port: 5173,
     strictPort: true,
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
   }
 });
