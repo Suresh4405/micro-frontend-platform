@@ -37,7 +37,7 @@ export default defineConfig({
     }
   },
   preview: {
-    port: 5173,
+    port: "https://micro-frontend-platform.vercel.app",
     strictPort: true,
   }
 });
