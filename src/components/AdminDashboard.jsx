@@ -1,10 +1,10 @@
-// src/components/AdminDashboard.jsx
+// AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
-import { fetchEmails, fetchUserData } from '../services/api';
 import './Admin.css';
 
+// Register ChartJS components
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const AdminDashboard = () => {
@@ -14,44 +14,65 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        console.log('Environment:', import.meta.env.MODE);
-        console.log('Is Production:', import.meta.env.PROD);
-        
-        // Fetch data from both APIs
-        const [emails, users] = await Promise.all([
-          fetchEmails(),
-          fetchUserData()
-        ]);
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        console.log('Email data received:', emails);
-        console.log('User data received:', users);
+      console.log("Fetching data from APIs...");
 
-        setEmailData(emails);
-        setUserData(users);
-        
-      } catch (err) {
-        console.error('Fetch error:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      const EVENTS_API =
+        import.meta.env.VITE_EVENTS_API ||
+        "https://micro-frontend-events.vercel.app";
+
+      const PRICING_API =
+        import.meta.env.VITE_PRICING_API ||
+        "https://micro-frontend-pricing.vercel.app";
+
+      const [emailsRes, usersRes] = await Promise.all([
+        fetch(`${EVENTS_API}/api/emails`),
+        fetch(`${PRICING_API}/api/userdata`)
+      ]);
+
+      console.log("Email response status:", emailsRes.status);
+      console.log("User response status:", usersRes.status);
+
+      if (!emailsRes.ok) {
+        throw new Error(`Email API error: ${emailsRes.status}`);
       }
-    };
 
-    fetchData();
-  }, []);
+      if (!usersRes.ok) {
+        throw new Error(`User API error: ${usersRes.status}`);
+      }
 
+      const emailsJson = await emailsRes.json();
+      const usersJson = await usersRes.json();
+
+      console.log("Email data received:", emailsJson);
+      console.log("User data received:", usersJson);
+
+      setEmailData(emailsJson);
+      setUserData(usersJson);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
+  // Process email data for charts
   const getEmailStats = () => {
     if (!emailData?.data) return null;
 
     const emails = emailData.data;
     const totalEmails = emails.length;
 
+    // Group by date (last 7 days)
     const last7Days = [...Array(7)].map((_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - i);
@@ -65,20 +86,24 @@ const AdminDashboard = () => {
     return { totalEmails, dailySignups, last7Days };
   };
 
+  // Process user data for charts
   const getUserStats = () => {
     if (!userData?.data) return null;
 
     const users = userData.data;
     const totalSubscriptions = users.length;
 
+    // Plan distribution
     const planCounts = users.reduce((acc, user) => {
       acc[user.plan] = (acc[user.plan] || 0) + 1;
       return acc;
     }, {});
 
+    // Location distribution (top 5)
     const locationCounts = users
       .filter(u => u.address)
       .reduce((acc, user) => {
+        // Extract city/location (simplified)
         const location = user.address.split(',').pop().trim() || 'Unknown';
         acc[location] = (acc[location] || 0) + 1;
         return acc;
@@ -91,6 +116,7 @@ const AdminDashboard = () => {
     return { totalSubscriptions, planCounts, topLocations };
   };
 
+  // Sorting function for user table
   const sortedUsers = () => {
     if (!userData?.data) return [];
     
@@ -118,6 +144,7 @@ const AdminDashboard = () => {
     setSortConfig({ key, direction });
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="admin-loading">
@@ -127,6 +154,7 @@ const AdminDashboard = () => {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="admin-error">
@@ -139,9 +167,11 @@ const AdminDashboard = () => {
     );
   }
 
+  // Calculate stats
   const emailStats = getEmailStats();
   const userStats = getUserStats();
 
+  // Chart data configurations
   const pieChartData = {
     labels: userStats ? Object.keys(userStats.planCounts) : [],
     datasets: [{
@@ -175,6 +205,7 @@ const AdminDashboard = () => {
     <div className="admin-container">
       <h1 className="admin-title">📊 Admin Dashboard</h1>
       
+      {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card">
           <h3>📧 Email Subscribers</h3>
@@ -204,6 +235,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Charts Section */}
       <div className="charts-grid">
         <div className="chart-card">
           <h3>📧 Email Signups (Last 7 Days)</h3>
@@ -276,6 +308,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Subscribers Table */}
       <div className="table-container">
         <h3>📋 Subscription Details</h3>
         <div className="table-wrapper">
@@ -316,6 +349,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Recent Email Subscribers */}
       <div className="table-container">
         <h3>📧 Recent Email Subscribers</h3>
         <div className="table-wrapper">
